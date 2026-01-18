@@ -4,7 +4,7 @@
 <link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
 <link rel="shortcut icon" href="./kimsze_sharp16.ico?v=20260111a">
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Subtraction — Place Value Mat (Step-by-step)</title>
 
   <style>
@@ -49,30 +49,31 @@
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
+
+    /* ✅ MOBILE FIX: allow scrolling and avoid clipping */
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       background: var(--bg);
       color: var(--ink);
-      overflow: hidden; /* no window scrolling */
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
       -webkit-text-size-adjust: 100%;
-      touch-action: manipulation;
     }
 
-    /* ✅ iOS safe-area padding + allow wrap on small screens */
+    /* ✅ MOBILE FIX: topbar can wrap, not forced fixed height */
     .topbar{
-      height: var(--topbarH);
+      height:auto;
+      min-height: var(--topbarH);
+
       border-bottom:1px solid var(--line);
       background: rgba(255,255,255,.92);
       backdrop-filter: blur(8px);
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
       gap:12px;
       padding: 10px 14px;
-      padding-top: calc(10px + env(safe-area-inset-top));
-      padding-left: calc(14px + env(safe-area-inset-left));
-      padding-right: calc(14px + env(safe-area-inset-right));
       position: sticky;
       top:0;
       z-index: 20;
@@ -83,7 +84,7 @@
       gap:10px;
       font-weight:1000;
       letter-spacing:.2px;
-      min-width: 120px;
+      min-width: 140px;
     }
     .title .big{ font-size: 18px; }
 
@@ -118,8 +119,7 @@
       cursor:pointer;
       white-space:nowrap;
       transition: transform .08s ease;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
+      touch-action: manipulation;
     }
     .btn:active{ transform: translateY(1px); }
     .btn.primary{
@@ -133,17 +133,17 @@
       transform:none;
     }
 
+    /* ✅ MOBILE FIX: no fixed viewport height; allow content to extend */
     .wrap{
-      height: calc(100vh - var(--topbarH));
+      height: auto;
+      min-height: calc(100vh - var(--topbarH));
       max-width: var(--maxW);
       margin: 0 auto;
-      padding: 12px 14px 10px;
-      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      padding: 12px 14px 14px;
       display:grid;
       grid-template-columns: 1.55fr .85fr;
       gap: var(--gap);
-      overflow:hidden;
-      min-height: 0;
+      overflow: visible;
     }
 
     .card{
@@ -678,7 +678,7 @@
       padding: 10px 10px;
       border: 1px solid var(--line);
       border-radius: 14px;
-      font-size: 16px; /* ✅ iOS: avoid zoom */
+      font-size: 14px;
       font-weight: 900;
       outline:none;
       background:#fff;
@@ -809,6 +809,7 @@
       border-color: rgba(14,165,233,.55) !important;
     }
 
+    /* ✅ MOBILE FIX: credit won't cover UI on phones */
     .credit{
       position: fixed;
       right: 14px;
@@ -817,87 +818,60 @@
       color: var(--muted);
       font-weight: 900;
       z-index: 5;
-      padding-right: env(safe-area-inset-right);
-      padding-bottom: env(safe-area-inset-bottom);
       pointer-events:none;
     }
 
-    /* =========================
-       ✅ Mobile + Tablet Responsive
-       ========================= */
-
-    /* Make topbar auto-height on smaller screens */
     @media (max-width: 980px){
-      :root{ --topbarH: auto; }
-      body{ overflow:hidden; }
-
-      .topbar{
-        height: auto;
-        align-items:flex-start;
-        flex-wrap:wrap;
-        gap:10px;
-      }
-      .actions{
-        width:100%;
-        justify-content:flex-start;
-      }
-      .actions .btn{
-        padding: 12px 12px;
-        font-size: 14px;
-      }
-
-      .wrap{
-        height: calc(100vh - 0px);
-        grid-template-columns: 1fr;
-        padding: 10px 10px 10px;
-        gap: 12px;
-        overflow:auto;                 /* ✅ allow page scroll on mobile */
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
-      }
-
-      .mat{ min-height: 340px; }
+      .wrap{ grid-template-columns: 1fr; padding: 10px 10px 14px; }
       .algoBox{ height: 300px; }
       .panelBody{ grid-template-rows: 300px auto; }
+      .cardHead, .panelHead, .panelBody, .matWrap, .eqBar{ padding-left: 12px; padding-right: 12px; }
     }
 
-    /* Tight phones */
-    @media (max-width: 520px){
-      .title .big{ font-size: 16px; }
-      .pill{ font-size: 11px; padding: 7px 9px; }
-
-      .eq{
-        font-size: clamp(22px, 5.8vw, 34px);
-        gap: 8px;
-        flex-wrap:wrap;
-        white-space:normal;
+    /* ✅ phone-specific */
+    @media (max-width: 640px){
+      :root{
+        --gap: 10px;
+        --algoColW: 44px;
+        --algoGap: 10px;
       }
-      .ansPill{ height: 46px; font-size: 28px; border-radius: 14px; }
 
-      .fields{ grid-template-columns: 1fr; }
-      .randRow{ grid-template-columns: 1fr; }
-      .childGrid{ grid-template-columns: 1fr; }
-      .childGrid .btn{ width:100%; }
+      .title .big{ font-size: 16px; }
+      .actions{ gap:8px; justify-content:flex-start; }
+      .pill{ font-size: 11px; padding: 6px 8px; }
+      .btn{ padding: 10px 10px; font-size: 13px; border-radius: 14px; }
+
+      .mat{ min-height: 360px; }
+
+      /* algorithm becomes natural height */
+      .panelBody{ grid-template-rows: auto auto; gap: 12px; }
+      .algoBox{ height: auto; min-height: 240px; padding: 10px; }
+
+      .digitsCol{ font-size: 40px; }
+      .renameRow{ font-size: 20px; }
+      .minus{ font-size: 24px; }
+      .resBox{ height: 44px; font-size: 28px; border-radius: 14px; }
 
       .stepTitle{ font-size: 26px; }
       .stepText{ font-size: 16px; }
       .stepEq{ font-size: 16px; }
-      .miniBox{ width: 50px; height: 40px; font-size: 22px; }
+      .miniBox{ width: 48px; height: 40px; font-size: 22px; }
 
-      /* Algorithm visuals slightly smaller so they fit */
-      :root{ --algoColW: 46px; --algoGap: 10px; }
-      .digitsCol{ font-size: 44px; }
-      .renameRow{ font-size: 22px; }
-      .resBox{ height: 44px; font-size: 28px; border-radius: 14px; }
+      .eq{ font-size: clamp(22px, 7vw, 38px); gap: 8px; }
+      .ansPill{ height: 46px; font-size: 28px; border-radius: 14px; }
 
-      /* Reduce pile gaps so blocks fit better */
-      .pileGrid{ gap: 8px; }
-      .pileTwoCol{ --colGap: 12px; --rowGap: 8px; }
-    }
+      /* credit becomes normal flow so it never covers buttons */
+      .credit{
+        position: static;
+        padding: 10px 12px 14px;
+        text-align: right;
+        pointer-events:none;
+      }
 
-    /* Respect reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      *{ scroll-behavior: auto !important; }
+      /* make child grid stack better */
+      .childGrid{ grid-template-columns: 1fr; }
+      .randRow{ grid-template-columns: 1fr; }
+      .rowBtns{ justify-content:flex-start; }
     }
   </style>
   <script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
@@ -1014,11 +988,11 @@
             <div class="fields">
               <div>
                 <label>Number A (≤ 4 digits)</label>
-                <input id="inA" type="number" min="0" max="9999" step="1" value="5320" inputmode="numeric"/>
+                <input id="inA" type="number" min="0" max="9999" step="1" value="5320"/>
               </div>
               <div>
                 <label>Number B (≤ 4 digits)</label>
-                <input id="inB" type="number" min="0" max="9999" step="1" value="2944" inputmode="numeric"/>
+                <input id="inB" type="number" min="0" max="9999" step="1" value="2944"/>
               </div>
             </div>
 
@@ -1410,7 +1384,7 @@
   function getCols(A,B){
     const d = Math.max(digitLen(A), digitLen(B));
     const use = Math.max(1, Math.min(4, d));
-    const keys = ["o","t","h","th"].slice(0, use).reverse(); // display: high -> low
+    const keys = ["o","t","h","th"].slice(0, use).reverse();
     return keys;
   }
 
@@ -1473,7 +1447,6 @@
     return el;
   }
 
-  // ======= Layout rules =======
   function useTwoColForPile(placeKey){
     if (displayMode === "discs") return true;
     if (placeKey === "t") return false;
@@ -1526,7 +1499,6 @@
     }
   }
 
-  // ======= Fit helpers =======
   function fitAllPiles(){
     const zones = ui.zones.querySelectorAll(".zone");
     zones.forEach(z => {
@@ -1555,7 +1527,6 @@
     ui.algoFit.style.transform = `scale(${s})`;
   }
 
-  // ======= Singapore-style number words (with hyphen) =======
   const ONES = ["zero","one","two","three","four","five","six","seven","eight","nine"];
   const TEENS = ["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
   const TENS = ["","", "twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
@@ -1595,15 +1566,12 @@
     const connector = (rem < 100 || isExactHundreds) ? " and " : ", ";
 
     let remWords = "";
-    if (rem < 100){
-      remWords = twoDigitWords(rem);
-    } else {
-      remWords = joinHundreds(rem);
-    }
+    if (rem < 100) remWords = twoDigitWords(rem);
+    else remWords = joinHundreds(rem);
+
     return thouWords + connector + remWords;
   }
 
-  // ======= STATE =======
   let A = 5320, B = 2944;
 
   const zoneMap = { work:{} };
@@ -1706,7 +1674,6 @@
     return out;
   }
 
-  // ======= RENDER =======
   function renderAll(){
     A = clampInt(A, 0, MAX_INPUT);
     B = clampInt(B, 0, MAX_INPUT);
@@ -1992,7 +1959,6 @@
     resetChildPanel();
   }
 
-  // ======= Smooth helper: animate a “split” (borrow) =======
   async function borrowSplit(fromPlace, toPlace){
     const fromPile = zoneMap.work[fromPlace].pile;
     const toPile   = zoneMap.work[toPlace].pile;
@@ -2076,7 +2042,6 @@
     document.body.classList.remove("animating");
   }
 
-  // ======= Smooth helper: subtract tokens (cross-out) =======
   async function crossOutAndRemove(placeKey, count){
     count = clampInt(count, 0, 99);
     if (count <= 0) return;
@@ -2122,7 +2087,6 @@
     document.body.classList.remove("animating");
   }
 
-  // ======= STEP LOGIC =======
   async function doNextStep(){
     if (busy) return;
 
@@ -2180,7 +2144,6 @@
     busy = false;
   }
 
-  // ======= Child Panel Logic =======
   function setChildMsg(kind, text){
     ui.childMsg.className = "childMsg " + kind;
     ui.childMsg.textContent = text;
@@ -2212,7 +2175,6 @@
     }
   }
 
-  // ======= Random helpers =======
   function randInt(min, max){
     return Math.floor(min + Math.random() * (max - min + 1));
   }
@@ -2233,7 +2195,6 @@
     renderAll();
   }
 
-  // ======= EVENTS =======
   ui.btnBlocks.addEventListener("click", () => setMode("blocks"));
   ui.btnDiscs.addEventListener("click",  () => setMode("discs"));
 
@@ -2293,7 +2254,6 @@
     });
   });
 
-  // ======= INIT =======
   ui.pillMode.textContent = "Blocks";
   renderAll();
 })();
