@@ -4,7 +4,7 @@
 <link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
 <link rel="shortcut icon" href="./kimsze_sharp16.ico?v=20260111a">
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>Subtraction — Place Value Mat (Step-by-step)</title>
 
   <style>
@@ -55,8 +55,11 @@
       background: var(--bg);
       color: var(--ink);
       overflow: hidden; /* no window scrolling */
+      -webkit-text-size-adjust: 100%;
+      touch-action: manipulation;
     }
 
+    /* ✅ iOS safe-area padding + allow wrap on small screens */
     .topbar{
       height: var(--topbarH);
       border-bottom:1px solid var(--line);
@@ -67,6 +70,9 @@
       justify-content:space-between;
       gap:12px;
       padding: 10px 14px;
+      padding-top: calc(10px + env(safe-area-inset-top));
+      padding-left: calc(14px + env(safe-area-inset-left));
+      padding-right: calc(14px + env(safe-area-inset-right));
       position: sticky;
       top:0;
       z-index: 20;
@@ -77,7 +83,7 @@
       gap:10px;
       font-weight:1000;
       letter-spacing:.2px;
-      min-width: 140px;
+      min-width: 120px;
     }
     .title .big{ font-size: 18px; }
 
@@ -112,6 +118,8 @@
       cursor:pointer;
       white-space:nowrap;
       transition: transform .08s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
     .btn:active{ transform: translateY(1px); }
     .btn.primary{
@@ -130,6 +138,7 @@
       max-width: var(--maxW);
       margin: 0 auto;
       padding: 12px 14px 10px;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
       display:grid;
       grid-template-columns: 1.55fr .85fr;
       gap: var(--gap);
@@ -669,7 +678,7 @@
       padding: 10px 10px;
       border: 1px solid var(--line);
       border-radius: 14px;
-      font-size: 14px;
+      font-size: 16px; /* ✅ iOS: avoid zoom */
       font-weight: 900;
       outline:none;
       background:#fff;
@@ -808,12 +817,87 @@
       color: var(--muted);
       font-weight: 900;
       z-index: 5;
+      padding-right: env(safe-area-inset-right);
+      padding-bottom: env(safe-area-inset-bottom);
+      pointer-events:none;
     }
 
+    /* =========================
+       ✅ Mobile + Tablet Responsive
+       ========================= */
+
+    /* Make topbar auto-height on smaller screens */
     @media (max-width: 980px){
-      .wrap{ grid-template-columns: 1fr; }
+      :root{ --topbarH: auto; }
+      body{ overflow:hidden; }
+
+      .topbar{
+        height: auto;
+        align-items:flex-start;
+        flex-wrap:wrap;
+        gap:10px;
+      }
+      .actions{
+        width:100%;
+        justify-content:flex-start;
+      }
+      .actions .btn{
+        padding: 12px 12px;
+        font-size: 14px;
+      }
+
+      .wrap{
+        height: calc(100vh - 0px);
+        grid-template-columns: 1fr;
+        padding: 10px 10px 10px;
+        gap: 12px;
+        overflow:auto;                 /* ✅ allow page scroll on mobile */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
+
+      .mat{ min-height: 340px; }
       .algoBox{ height: 300px; }
       .panelBody{ grid-template-rows: 300px auto; }
+    }
+
+    /* Tight phones */
+    @media (max-width: 520px){
+      .title .big{ font-size: 16px; }
+      .pill{ font-size: 11px; padding: 7px 9px; }
+
+      .eq{
+        font-size: clamp(22px, 5.8vw, 34px);
+        gap: 8px;
+        flex-wrap:wrap;
+        white-space:normal;
+      }
+      .ansPill{ height: 46px; font-size: 28px; border-radius: 14px; }
+
+      .fields{ grid-template-columns: 1fr; }
+      .randRow{ grid-template-columns: 1fr; }
+      .childGrid{ grid-template-columns: 1fr; }
+      .childGrid .btn{ width:100%; }
+
+      .stepTitle{ font-size: 26px; }
+      .stepText{ font-size: 16px; }
+      .stepEq{ font-size: 16px; }
+      .miniBox{ width: 50px; height: 40px; font-size: 22px; }
+
+      /* Algorithm visuals slightly smaller so they fit */
+      :root{ --algoColW: 46px; --algoGap: 10px; }
+      .digitsCol{ font-size: 44px; }
+      .renameRow{ font-size: 22px; }
+      .resBox{ height: 44px; font-size: 28px; border-radius: 14px; }
+
+      /* Reduce pile gaps so blocks fit better */
+      .pileGrid{ gap: 8px; }
+      .pileTwoCol{ --colGap: 12px; --rowGap: 8px; }
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *{ scroll-behavior: auto !important; }
     }
   </style>
   <script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
@@ -930,11 +1014,11 @@
             <div class="fields">
               <div>
                 <label>Number A (≤ 4 digits)</label>
-                <input id="inA" type="number" min="0" max="9999" step="1" value="5320"/>
+                <input id="inA" type="number" min="0" max="9999" step="1" value="5320" inputmode="numeric"/>
               </div>
               <div>
                 <label>Number B (≤ 4 digits)</label>
-                <input id="inB" type="number" min="0" max="9999" step="1" value="2944"/>
+                <input id="inB" type="number" min="0" max="9999" step="1" value="2944" inputmode="numeric"/>
               </div>
             </div>
 
@@ -1225,75 +1309,69 @@
   }
 
   function playClap(){
-  const ctx = ensureAudio();
-  if (!ctx) return;
+    const ctx = ensureAudio();
+    if (!ctx) return;
 
-  // ✅ Force resume BEFORE making sound (important on Chrome/iOS)
-  if (ctx.state === "suspended"){
-    ctx.resume().then(() => playClap()).catch(()=>{});
-    return;
-  }
-
-  const t0 = ctx.currentTime;
-
-  // Small compressor so it’s loud without distortion
-  const comp = ctx.createDynamicsCompressor();
-  comp.threshold.setValueAtTime(-20, t0);
-  comp.knee.setValueAtTime(18, t0);
-  comp.ratio.setValueAtTime(6, t0);
-  comp.attack.setValueAtTime(0.003, t0);
-  comp.release.setValueAtTime(0.12, t0);
-  comp.connect(ctx.destination);
-
-  const mkBurst = (offset, dur, f0, q, gain) => {
-    const start = t0 + offset;
-    const len = Math.max(0.02, dur);
-    const bufferSize = Math.floor(ctx.sampleRate * len);
-    const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-
-    for (let i=0;i<bufferSize;i++){
-      const x = i / bufferSize;
-      // strong attack + fast decay for “clap”
-      const env = Math.pow(1 - x, 2.6);
-      data[i] = (Math.random()*2 - 1) * env;
+    if (ctx.state === "suspended"){
+      ctx.resume().then(() => playClap()).catch(()=>{});
+      return;
     }
 
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
+    const t0 = ctx.currentTime;
 
-    const bp = ctx.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.frequency.setValueAtTime(f0, start);
-    bp.Q.setValueAtTime(q, start);
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.setValueAtTime(-20, t0);
+    comp.knee.setValueAtTime(18, t0);
+    comp.ratio.setValueAtTime(6, t0);
+    comp.attack.setValueAtTime(0.003, t0);
+    comp.release.setValueAtTime(0.12, t0);
+    comp.connect(ctx.destination);
 
-    const hp = ctx.createBiquadFilter();
-    hp.type = "highpass";
-    hp.frequency.setValueAtTime(500, start);
+    const mkBurst = (offset, dur, f0, q, gain) => {
+      const start = t0 + offset;
+      const len = Math.max(0.02, dur);
+      const bufferSize = Math.floor(ctx.sampleRate * len);
+      const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buf.getChannelData(0);
 
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, start);
-    g.gain.exponentialRampToValueAtTime(gain, start + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, start + len);
+      for (let i=0;i<bufferSize;i++){
+        const x = i / bufferSize;
+        const env = Math.pow(1 - x, 2.6);
+        data[i] = (Math.random()*2 - 1) * env;
+      }
 
-    src.connect(bp);
-    bp.connect(hp);
-    hp.connect(g);
-    g.connect(comp);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
 
-    src.start(start);
-    src.stop(start + len + 0.01);
-  };
+      const bp = ctx.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.setValueAtTime(f0, start);
+      bp.Q.setValueAtTime(q, start);
 
-  // 4 overlapping bursts = audible clap
-  mkBurst(0.00, 0.13, 1600, 1.1, 0.70);
-  mkBurst(0.03, 0.14, 1200, 1.0, 0.55);
-  mkBurst(0.07, 0.11, 2200, 1.4, 0.40);
-  mkBurst(0.10, 0.10, 900,  0.9, 0.30);
-}
+      const hp = ctx.createBiquadFilter();
+      hp.type = "highpass";
+      hp.frequency.setValueAtTime(500, start);
 
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.exponentialRampToValueAtTime(gain, start + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, start + len);
 
-   
+      src.connect(bp);
+      bp.connect(hp);
+      hp.connect(g);
+      g.connect(comp);
+
+      src.start(start);
+      src.stop(start + len + 0.01);
+    };
+
+    mkBurst(0.00, 0.13, 1600, 1.1, 0.70);
+    mkBurst(0.03, 0.14, 1200, 1.0, 0.55);
+    mkBurst(0.07, 0.11, 2200, 1.4, 0.40);
+    mkBurst(0.10, 0.10, 900,  0.9, 0.30);
+  }
+
   // ======= HELPERS =======
   const clampInt = (n, min, max) => {
     const raw = (typeof n === "string") ? n : String(n);
@@ -1398,8 +1476,8 @@
   // ======= Layout rules =======
   function useTwoColForPile(placeKey){
     if (displayMode === "discs") return true;
-    if (placeKey === "t") return false; // tens blocks: 5 on top, 4 below
-    return true; // ones/hundreds/thousands blocks: 5 left, 4 right
+    if (placeKey === "t") return false;
+    return true;
   }
 
   function ensureTwoColStructure(pileEl){
@@ -1443,7 +1521,7 @@
       ensureTwoColStructure(pileEl);
       for (const t of tokens) putTokenTwoCol(pileEl, t);
     } else {
-      pileEl.className = "pile pileGrid"; // 5 top, 4 below
+      pileEl.className = "pile pileGrid";
       for (const t of tokens) pileEl.appendChild(t);
     }
   }
@@ -1507,7 +1585,7 @@
       return joinHundreds(n);
     }
 
-    const thousands = Math.floor(n / 1000); // 1..9
+    const thousands = Math.floor(n / 1000);
     const rem = n % 1000;
 
     const thouWords = `${ONES[thousands]} thousand`;
@@ -1528,14 +1606,14 @@
   // ======= STATE =======
   let A = 5320, B = 2944;
 
-  const zoneMap = { work:{} }; // single working row
+  const zoneMap = { work:{} };
   let actions = [];
   let actionIndex = 0;
   let busy = false;
 
-  let renameDigits = {};    // what to show above A (renamed values)
-  let strikeDigits = {};    // which original digits to strike
-  let resultDigits = {};    // revealed results per column
+  let renameDigits = {};
+  let strikeDigits = {};
+  let resultDigits = {};
 
   function showErr(msg){
     ui.errBox.style.display = msg ? "block" : "none";
@@ -1543,7 +1621,6 @@
   }
 
   function enforceSubRule(){
-    // ensure A >= B
     if (A < B){
       const tmp = A; A = B; B = tmp;
       ui.inA.value = A;
@@ -1569,30 +1646,24 @@
   }
 
   function buildActions(cols){
-    const work = splitDigits(A);   // mutable working digits (after renaming)
+    const work = splitDigits(A);
     const sub  = splitDigits(B);
 
     const colsSet = new Set(cols);
-    const placesAsc = cols.slice().reverse(); // ones -> highest (within cols)
-    const allAsc = ORDER.filter(k => colsSet.has(k)); // low->high subset
+    const placesAsc = cols.slice().reverse();
+    const allAsc = ORDER.filter(k => colsSet.has(k));
 
     const out = [];
     for (const p of placesAsc){
-      // borrow until enough
       while ((work[p] ?? 0) < (sub[p] ?? 0)){
-        // find nearest donor higher than p
         const pi = allAsc.indexOf(p);
         let donorIndex = -1;
         for (let j = pi+1; j < allAsc.length; j++){
           const k = allAsc[j];
           if ((work[k] ?? 0) > 0){ donorIndex = j; break; }
         }
-        if (donorIndex === -1){
-          // should not happen when A>=B
-          break;
-        }
+        if (donorIndex === -1) break;
 
-        // cascade down donor -> ... -> p
         for (let j = donorIndex; j > pi; j--){
           const high = allAsc[j];
           const low  = allAsc[j-1];
@@ -1649,7 +1720,6 @@
     ui.prompt.textContent = `(a) Subtract ${B} from ${A}.`;
 
     ui.ruleNote.textContent = "Use Next Step to follow the renaming (borrowing) steps, then subtract place by place.";
-
     ui.childEq.textContent = `${A} − ${B}`;
 
     const cols = getCols(A,B);
@@ -1700,7 +1770,6 @@
 
     cols.forEach(k => ui.zones.appendChild(makeZone(k)));
 
-    // fill piles with A only (single working set)
     const da = splitDigits(A);
     cols.forEach(k => fillPile(zoneMap.work[k].pile, k, da[k] ?? 0));
 
@@ -1716,7 +1785,7 @@
   function fillPile(pileEl, placeKey, count){
     pileEl.innerHTML = "";
     pileEl.dataset.place = placeKey;
-    count = clampInt(count, 0, 99); // allow 10/11/12 after renaming (discs/blocks)
+    count = clampInt(count, 0, 99);
 
     if (useTwoColForPile(placeKey)) {
       pileEl.className = "pile pileTwoCol";
@@ -1798,8 +1867,6 @@
 
   function updateRenameDisplay(cols){
     const spans = Array.from(ui.renameRow.children);
-
-    // reset strike styles on rowA
     Array.from(ui.rowA.children).forEach(sp => sp.classList.remove("strike"));
 
     cols.forEach((k, idx) => {
@@ -1813,7 +1880,6 @@
       } else {
         sp.textContent = String(v);
         sp.className = "renamed";
-        // strike original digit in rowA for that column
         if (strikeDigits[k]){
           const aSp = ui.rowA.children[idx];
           if (aSp) aSp.classList.add("strike");
@@ -1821,7 +1887,6 @@
       }
     });
 
-    // if all blank, keep them blank
     const any = cols.some(k => renameDigits[k] !== null && renameDigits[k] !== undefined);
     if (!any){
       spans.forEach(sp => { sp.textContent = ""; sp.className = "blank"; });
@@ -1864,7 +1929,6 @@
       b.style.outlineOffset = "0px";
     });
 
-    // highlight based on next SUBTRACT action’s place
     const next = actions[actionIndex];
     const place = next?.type === "subtract" ? next.place :
                   next?.type === "borrow" ? next.to : null;
@@ -1943,7 +2007,6 @@
     const fromRect = donor.getBoundingClientRect();
     donor.classList.add("movingHidden");
 
-    // ghost donor shrink
     const ghostDonor = document.createElement("div");
     ghostDonor.className = "ghost";
     ghostDonor.style.width = fromRect.width + "px";
@@ -1969,7 +2032,6 @@
     ghostDonor.remove();
     donor.remove();
 
-    // create 10 new tokens in TO pile, hidden first
     const newTokens = [];
     for (let i=0;i<10;i++){
       const t = makeTokenEl(toPlace);
@@ -1981,7 +2043,6 @@
     repackPile(fromPile, fromPlace);
     fitAllPiles();
 
-    // animate “burst” from donor center to each new token position
     resumeAudioIfNeeded();
     playSwoosh();
 
@@ -2072,7 +2133,6 @@
     busy = true;
 
     if (a.type === "borrow"){
-      // update algorithm rename row (and strike original digits)
       renameDigits[a.from] = a.highAfter;
       renameDigits[a.to]   = a.lowAfter;
       strikeDigits[a.from] = true;
@@ -2094,14 +2154,11 @@
       return;
     }
 
-    // subtract step
     await crossOutAndRemove(a.place, a.subVal);
 
-    // reveal result digit for that place (remaining tokens)
     resultDigits[a.place] = a.resVal;
     renderAlgoResults(cols);
 
-    // show mini answer as revealed
     ui.stepAns.textContent = String(a.resVal);
     ui.stepAns.classList.remove("mystery");
 
@@ -2114,7 +2171,6 @@
     fitAllPiles();
     fitAlgo();
 
-    // finished?
     const done = cols.every(k => resultDigits[k] !== null);
     if (done){
       ui.btnDone.disabled = false;
@@ -2145,7 +2201,6 @@
     if (Number.isFinite(guess) && guess === correct){
       setChildMsg("ok", "🎉 Correct! Well done!");
       playClick();
-      // ✅ NEW: clap sound on correct
       playClap();
       burstConfetti();
     } else {
@@ -2246,5 +2301,3 @@
 
 </body>
 </html>
-
-
