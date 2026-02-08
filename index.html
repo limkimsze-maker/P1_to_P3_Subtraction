@@ -1,11 +1,17 @@
 <!doctype html>
 <html lang="en">
 <head>
-<link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
-<link rel="shortcut icon" href="./kimsze_sharp16.ico?v=20260111a">
+  <!-- Money Subtraction (SGD) — Step-by-step | Designed by Lim Kim Sze © 2026 -->
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Subtraction — Place Value Mat (Step-by-step)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>Subtraction — Money Algorithm (SGD, Step-by-step)</title>
+
+  <!-- Favicon (Kim Sze standard) -->
+  <link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
+  <link rel="shortcut icon" href="./kimsze_sharp16.ico?v=20260111a">
+
+  <!-- Counter.dev (Kim Sze standard) -->
+  <script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
 
   <style>
     :root{
@@ -18,38 +24,1537 @@
       --shadow:0 14px 30px rgba(2,6,23,.10);
       --radius:22px;
 
-      /* SVG token sizes (base; auto-fit will scale down) */
-      --oneW: 22px;  --oneH: 25px;
-      --tenW: 16px;  --tenH: 84px;
-      --hunW: 54px;  --hunH: 34px;
-      --thouW: 48px; --thouH: 56px;
-
-      /* ✅ shrink thousand blocks to 80% */
-      --thouScale: .8;
-
-      /* Disc token sizes */
-      --disc: 44px;
-      --discFont: 14px;
-
-      /* Animation */
-      --moveDur: 1400ms;
-      --regroupDur: 1100ms;
-      --ease: cubic-bezier(.2,.85,.2,1);
-
-      /* Layout */
       --topbarH: 62px;
       --gap: 14px;
-      --maxW: 1320px;
+      --maxW: 1400px;
 
-      /* ✅ Algorithm column alignment */
-      --colCount: 4;          /* set by JS */
-      --algoColW: 54px;       /* fixed column width so digits/results line up */
-      --algoGap: 14px;
+      --moveDur: 550ms;
+      --ease: cubic-bezier(.2,.85,.2,1);
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
 
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .topbar{
+      height:auto;
+      min-height: var(--topbarH);
+      border-bottom:1px solid var(--line);
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(8px);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding: 10px 14px;
+      position: sticky;
+      top:0;
+      z-index: 20;
+    }
+    .title{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      font-weight:1000;
+      letter-spacing:.2px;
+      min-width: 140px;
+    }
+    .title .big{ font-size: 18px; }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:999px;
+      padding:8px 10px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      font-weight:1000;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .pill strong{ color: var(--ink); }
+    .btn{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight:1000;
+      font-size:13px;
+      cursor:pointer;
+      white-space:nowrap;
+      transition: transform .08s ease;
+      touch-action: manipulation;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      background:#0f172a;
+      border-color:#0f172a;
+      color:#fff;
+    }
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .wrap{
+      height: auto;
+      min-height: calc(100vh - var(--topbarH));
+      max-width: var(--maxW);
+      margin: 0 auto;
+      padding: 12px 14px 14px;
+      display:grid;
+      grid-template-columns: 1.55fr .85fr;
+      gap: var(--gap);
+      overflow: visible;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      min-height:0;
+    }
+
+    .leftCard{
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      min-height:0;
+    }
+    .cardHead{
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .cardHead .h{
+      font-weight:1000;
+      letter-spacing:.2px;
+    }
+    .cardHead .sub{
+      margin-top:2px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+      line-height:1.25;
+    }
+
+    .matWrap{
+      padding: 12px 14px 12px;
+      min-height:0;
+    }
+    .mat{
+      position: relative;
+      height: 100%;
+      min-height: 520px;
+      border-radius: 22px;
+      border: 2px solid rgba(15,23,42,.16);
+      overflow:hidden;
+      background:#fff;
+    }
+
+    /* two regions: dollars / cents */
+    .matGrid{
+      position:absolute;
+      inset:0;
+      display:grid;
+      grid-template-rows: auto 1fr;
+    }
+    .matHeader{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid rgba(15,23,42,.12);
+      background: linear-gradient(180deg, rgba(241,245,249,.85), rgba(241,245,249,.25));
+    }
+    .matHeader .sec{
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-weight:1000;
+    }
+    .matHeader .sec .tag{
+      font-size:12px;
+      font-weight:1000;
+      color: var(--muted);
+      border:1px solid var(--line);
+      background:#fff;
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .matBody{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      min-height:0;
+    }
+    .secBody{
+      position:relative;
+      min-height:0;
+      padding: 10px 10px 10px;
+      overflow:hidden;
+    }
+    .secBody.dollars{
+      background: linear-gradient(180deg, rgba(223,247,255,.95), rgba(223,247,255,.35));
+      border-right: 1px solid rgba(15,23,42,.10);
+    }
+    .secBody.cents{
+      background: linear-gradient(180deg, rgba(255,241,219,.92), rgba(255,241,219,.32));
+    }
+    body.animating .secBody{ background:#fff !important; }
+
+    /* columns per section */
+    .denomCols{
+      position:absolute;
+      inset:0;
+      display:grid;
+      gap: 10px;
+      padding: 10px;
+      align-content: stretch;
+      justify-content: stretch;
+    }
+    .denomCol{
+      border-radius: 18px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 10px 18px rgba(0,0,0,.06);
+      overflow:hidden;
+      display:grid;
+      grid-template-rows: auto 1fr;
+      min-height:0;
+    }
+    .denomHead{
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 8px;
+      font-weight:1000;
+    }
+    .denomHead .label{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .denomHead .mini{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+    .pileWrap{
+      padding: 10px;
+      min-height:0;
+      display:grid;
+      place-items:center;
+    }
+    .fitBox{
+      transform-origin:center;
+      will-change: transform;
+    }
+    .pile{
+      display:grid;
+      grid-template-columns: repeat(5, max-content);
+      grid-auto-rows: max-content;
+      justify-content:center;
+      align-content:center;
+      gap: 10px;
+      transform-origin:center;
+      will-change: transform;
+    }
+
+    /* tokens */
+    .token{
+      user-select:none;
+      pointer-events:none;
+      position:relative;
+      width: 52px;
+      height: 52px;
+      display:grid;
+      place-items:center;
+      transition: transform var(--moveDur) var(--ease), opacity var(--moveDur) var(--ease);
+    }
+    .token.note{
+      width: 78px;
+      height: 48px;
+      border-radius: 12px;
+      border: 3px solid rgba(15,23,42,.18);
+      box-shadow: 0 12px 18px rgba(0,0,0,.16), inset 0 -8px 14px rgba(0,0,0,.10);
+    }
+    .token.coin{
+      border-radius: 999px;
+      border: 3px solid rgba(15,23,42,.16);
+      box-shadow: 0 12px 18px rgba(0,0,0,.16), inset 0 -8px 14px rgba(0,0,0,.10);
+    }
+    .token .txt{
+      font-weight: 1000;
+      color: rgba(0,0,0,.85);
+      text-shadow: 0 1px 0 rgba(255,255,255,.35);
+      font-size: 14px;
+      white-space:nowrap;
+      padding: 0 6px;
+      text-align:center;
+      line-height: 1.05;
+    }
+
+    .movingHidden{ opacity:0 !important; transform: scale(.85) !important; }
+
+    .eqBar{
+      padding: 12px 14px 14px;
+      border-top: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(233,243,242,.65), rgba(233,243,242,.18));
+      display:flex;
+      flex-direction: column;
+      align-items:flex-start;
+      justify-content:flex-start;
+      gap: 8px;
+    }
+    .eq{
+      font-weight: 1000;
+      letter-spacing:.2px;
+      font-size: clamp(26px, 3.6vw, 48px);
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      white-space:nowrap;
+      flex-wrap:wrap;
+    }
+    .ansPill{
+      min-width: 130px;
+      height: 54px;
+      border-radius: 16px;
+      border: 3px solid rgba(44,93,0,.35);
+      background: rgba(214,255,180,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+      font-size: 30px;
+      color:#000;
+      box-shadow: 0 10px 18px rgba(0,0,0,.12);
+      padding: 0 12px;
+    }
+    .eqHint{
+      font-size:12px;
+      color: var(--muted);
+      font-weight: 900;
+      line-height:1.25;
+    }
+
+    .rightCol{
+      display:grid;
+      grid-template-rows: auto 1fr;
+      gap: var(--gap);
+      min-height:0;
+    }
+    .panelHead{
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .panelHead .h{
+      font-weight:1000;
+      letter-spacing:.2px;
+    }
+    .panelHead .small{
+      font-size:12px;
+      color: var(--muted);
+      font-weight: 900;
+      white-space:nowrap;
+    }
+
+    .panelBody{
+      padding: 12px 14px 14px;
+      display:grid;
+      gap: 12px;
+      min-height:0;
+    }
+
+    .stepCard{
+      border: 2px solid rgba(245,158,11,.75);
+      border-radius: 18px;
+      padding: 12px 12px;
+      display:grid;
+      gap: 6px;
+      background:#fff;
+      box-shadow: 0 10px 18px rgba(0,0,0,.06);
+    }
+    .stepTitle{
+      font-weight:1000;
+      font-size: 30px;
+      letter-spacing:.2px;
+      color: #f59e0b;
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
+    .stepText{
+      font-weight:1000;
+      font-size: 18px;
+      color:#000;
+      line-height:1.25;
+    }
+    .stepEq{
+      font-weight:1000;
+      font-size: 18px;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+      color:#000;
+    }
+    .miniBox{
+      min-width: 92px;
+      height: 44px;
+      border-radius: 14px;
+      border: 3px solid rgba(44,93,0,.35);
+      background: rgba(214,255,180,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+      font-size: 22px;
+      color:#000;
+      box-shadow: 0 10px 18px rgba(0,0,0,.12);
+      padding: 0 10px;
+    }
+    .miniBox.mystery{ color: rgba(0,0,0,.35); }
+
+    .teacherWrap{
+      border-radius: 18px;
+      background:#fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 10px 18px rgba(0,0,0,.06);
+      overflow:hidden;
+    }
+    .teacherWrap .inner{
+      padding: 10px 12px 12px;
+      display:grid;
+      gap: 10px;
+    }
+    .fields{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    label{
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+      display:block;
+      margin-bottom: 6px;
+    }
+    input[type="number"], select{
+      width:100%;
+      padding: 10px 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 900;
+      outline:none;
+      background:#fff;
+    }
+    .rowBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top: 2px;
+    }
+    .seg{
+      display:flex;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .seg button{
+      border:0;
+      background:transparent;
+      padding: 10px 12px;
+      font-weight:1000;
+      font-size:13px;
+      color: var(--muted);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .seg button.active{
+      background:#0f172a;
+      color:#fff;
+    }
+
+    .noteErr{
+      font-size:12px;
+      font-weight: 900;
+      color:#b91c1c;
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.25);
+      padding: 10px 12px;
+      border-radius: 14px;
+      display:none;
+      line-height:1.25;
+    }
+
+    .credit{
+      position: fixed;
+      right: 14px;
+      bottom: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+      z-index: 5;
+      pointer-events:none;
+    }
+
+    @media (max-width: 980px){
+      .wrap{ grid-template-columns: 1fr; padding: 10px 10px 14px; }
+      .mat{ min-height: 520px; }
+      .cardHead, .panelHead, .panelBody, .matWrap, .eqBar{ padding-left: 12px; padding-right: 12px; }
+    }
+    @media (max-width: 640px){
+      :root{ --gap: 10px; }
+      .title .big{ font-size: 16px; }
+      .actions{ gap:8px; justify-content:flex-start; }
+      .pill{ font-size: 11px; padding: 6px 8px; }
+      .btn{ padding: 10px 10px; font-size: 13px; border-radius: 14px; }
+      .fields{ grid-template-columns: 1fr; }
+      .token{ width: 46px; height: 46px; }
+      .token.note{ width: 70px; height: 44px; }
+      .token .txt{ font-size: 13px; }
+      .credit{
+        position: static;
+        padding: 10px 12px 14px;
+        text-align: right;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="title">
+      <span class="big">Money Subtraction</span>
+    </div>
+
+    <div class="actions">
+      <div class="pill"><span>A:</span><strong id="pillA">$12.35</strong></div>
+      <div class="pill"><span>B:</span><strong id="pillB">$7.80</strong></div>
+      <div class="pill"><span>Order:</span><strong id="pillOrder">Cents → Dollars</strong></div>
+      <button class="btn" id="btnReset">↺ Reset</button>
+      <button class="btn primary" id="btnNext">Next Step ▶</button>
+      <button class="btn" id="btnDone" disabled>Done ✓</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section class="card leftCard">
+      <div class="cardHead">
+        <div>
+          <div class="h" id="prompt">(a) Subtract $7.80 from $12.35.</div>
+          <div class="sub" id="subNote">
+            Click <b>Next Step</b> to make change (rename) when needed, then subtract in the chosen order.
+            <br><b>SGD cents are in multiples of 5¢</b> (no 1¢ coins).
+          </div>
+        </div>
+      </div>
+
+      <div class="matWrap">
+        <div class="mat" id="mat">
+          <div class="matGrid">
+            <div class="matHeader">
+              <div class="sec">
+                <div>💵 Dollars</div>
+                <div class="tag">Denoms: $100, $50, $10, $5, $2, $1</div>
+              </div>
+              <div class="sec">
+                <div>🪙 Cents</div>
+                <div class="tag">Denoms: 50¢, 20¢, 10¢, 5¢</div>
+              </div>
+            </div>
+
+            <div class="matBody">
+              <div class="secBody dollars">
+                <div class="denomCols" id="dollarCols"></div>
+              </div>
+              <div class="secBody cents">
+                <div class="denomCols" id="centCols"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="eqBar">
+        <div class="eq">
+          <span id="eqA">$12.35</span>
+          <span>−</span>
+          <span id="eqB">$7.80</span>
+          <span>=</span>
+          <span class="ansPill" id="eqAns">?</span>
+        </div>
+        <div class="eqHint" id="eqHint">Click Next Step</div>
+      </div>
+    </section>
+
+    <aside class="card">
+      <div class="panelHead">
+        <div class="h">Teaching Panel</div>
+        <div class="small">Make change → Subtract</div>
+      </div>
+
+      <div class="panelBody">
+        <div class="stepCard" id="stepCard">
+          <div class="stepTitle" id="stepTitle">STEP 1</div>
+          <div class="stepText" id="stepText">Make change if needed.</div>
+          <div class="stepEq">
+            <span id="stepL">?</span>
+            <span>=</span>
+            <span class="miniBox mystery" id="stepAns">?</span>
+          </div>
+        </div>
+
+        <div class="teacherWrap">
+          <div class="inner">
+            <div class="fields">
+              <div>
+                <label>Amount A — dollars</label>
+                <input id="inAd" type="number" min="0" max="9999" step="1" value="12"/>
+              </div>
+              <div>
+                <label>Amount A — cents (0–95, multiple of 5)</label>
+                <input id="inAc" type="number" min="0" max="95" step="5" value="35"/>
+              </div>
+            </div>
+
+            <div class="fields">
+              <div>
+                <label>Amount B — dollars</label>
+                <input id="inBd" type="number" min="0" max="9999" step="1" value="7"/>
+              </div>
+              <div>
+                <label>Amount B — cents (0–95, multiple of 5)</label>
+                <input id="inBc" type="number" min="0" max="95" step="5" value="80"/>
+              </div>
+            </div>
+
+            <div class="rowBtns">
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn primary" id="btnApply">Apply</button>
+                <button class="btn" id="btnSwap">Swap A/B</button>
+              </div>
+
+              <div class="seg" aria-label="Order">
+                <button type="button" id="btnCentsFirst" class="active">Cents → Dollars</button>
+                <button type="button" id="btnDollarsFirst">Dollars → Cents</button>
+              </div>
+            </div>
+
+            <div class="noteErr" id="errBox"></div>
+            <div style="font-size:12px; color:var(--muted); font-weight:900; line-height:1.25;">
+              Notes:
+              <ul style="margin:8px 0 0 18px; padding:0;">
+                <li>SGD: no 1¢ denomination, so cents must be multiples of 5¢.</li>
+                <li>When borrowing 1 dollar to cents, the app changes <b>$1 → 10×10¢</b> (clean, standard teaching regroup).</li>
+                <li>Within cents, it changes <b>50¢ → 5×10¢</b> and <b>20¢ → 2×10¢</b> when needed.</li>
+                <li>Within dollars, it changes <b>$10 → 10×$1</b>, <b>$5 → 5×$1</b>, <b>$2 → 2×$1</b> (and $50/$100 into $10s if needed).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+  <div class="credit">Designed by Lim Kim Sze © 2026</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  // ======= Denominations (SGD strict; NO 1¢) =======
+  const DOLLAR_DENOMS = [100, 50, 10, 5, 2, 1];        // dollars
+  const CENT_DENOMS   = [50, 20, 10, 5];               // cents (no 1)
+  const ALL_DENOMS = [
+    ...DOLLAR_DENOMS.map(v => ({kind:"$" , v})),
+    ...CENT_DENOMS.map(v => ({kind:"c" , v}))
+  ];
+
+  // Make-change rules (kept simple + teachable)
+  // dollars:
+  //   100 -> 2×50 (optional), but we convert 100 -> 10×10 for simplicity if needed
+  //   50  -> 5×10
+  //   10  -> 10×1
+  //   5   -> 5×1
+  //   2   -> 2×1
+  // cross:
+  //   1 dollar -> 10×10¢
+  // cents:
+  //   50¢ -> 5×10¢
+  //   20¢ -> 2×10¢
+  //   10¢ -> 2×5¢
+  const CHANGE = {
+    "$100": [{k:"$", v:10, n:10}],            // $100 -> 10×$10 (simple)
+    "$50" : [{k:"$", v:10, n:5}],
+    "$10" : [{k:"$", v:1,  n:10}],
+    "$5"  : [{k:"$", v:1,  n:5}],
+    "$2"  : [{k:"$", v:1,  n:2}],
+    "$1"  : [{k:"c", v:10, n:10}],            // $1 -> 10×10¢ (SGD compliant)
+    "c50" : [{k:"c", v:10, n:5}],
+    "c20" : [{k:"c", v:10, n:2}],
+    "c10" : [{k:"c", v:5,  n:2}],
+  };
+
+  const ui = {
+    pillA: $("pillA"), pillB: $("pillB"), pillOrder: $("pillOrder"),
+    eqA: $("eqA"), eqB: $("eqB"), eqAns: $("eqAns"), eqHint: $("eqHint"),
+    prompt: $("prompt"),
+
+    inAd: $("inAd"), inAc: $("inAc"), inBd: $("inBd"), inBc: $("inBc"),
+    btnApply: $("btnApply"), btnSwap: $("btnSwap"),
+
+    btnCentsFirst: $("btnCentsFirst"), btnDollarsFirst: $("btnDollarsFirst"),
+
+    btnReset: $("btnReset"), btnNext: $("btnNext"), btnDone: $("btnDone"),
+
+    stepTitle: $("stepTitle"), stepText: $("stepText"), stepL: $("stepL"), stepAns: $("stepAns"),
+    errBox: $("errBox"),
+
+    dollarCols: $("dollarCols"),
+    centCols: $("centCols"),
+  };
+
+  // ======= Tiny audio (click/swoosh) =======
+  let audioCtx = null;
+  function ensureAudio(){
+    if (audioCtx) return audioCtx;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+    return audioCtx;
+  }
+  function resumeAudioIfNeeded(){
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    if (ctx.state === "suspended") ctx.resume().catch(()=>{});
+  }
+  window.addEventListener("pointerdown", resumeAudioIfNeeded, { passive:true });
+
+  function playClick(){
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t0 = ctx.currentTime;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "square";
+    o.frequency.setValueAtTime(760, t0);
+    o.frequency.exponentialRampToValueAtTime(260, t0 + 0.03);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.20, t0 + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.07);
+    o.connect(g).connect(ctx.destination);
+    o.start(t0);
+    o.stop(t0 + 0.08);
+  }
+  function playSwoosh(){
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t0 = ctx.currentTime;
+    const dur = 0.26;
+    const bufferSize = Math.floor(ctx.sampleRate * dur);
+    const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i=0;i<bufferSize;i++){
+      const x = i / bufferSize;
+      const env = Math.sin(Math.PI * x);
+      data[i] = (Math.random()*2-1) * env * 0.9;
+    }
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(900, t0);
+    filter.frequency.exponentialRampToValueAtTime(220, t0 + dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.18, t0 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(filter).connect(g).connect(ctx.destination);
+    src.start(t0);
+    src.stop(t0 + dur + 0.02);
+  }
+
+  // ======= Helpers =======
+  const clampInt = (x, min, max) => {
+    let n = parseInt(String(x ?? "").trim(), 10);
+    if (!Number.isFinite(n)) n = 0;
+    n = Math.floor(n);
+    return Math.max(min, Math.min(max, n));
+  };
+
+  function showErr(msg){
+    ui.errBox.style.display = msg ? "block" : "none";
+    ui.errBox.textContent = msg || "";
+  }
+
+  function moneyToCents(d, c){
+    return clampInt(d, 0, 9999)*100 + clampInt(c, 0, 95);
+  }
+  function centsToMoney(totalCents){
+    totalCents = Math.max(0, Math.floor(totalCents));
+    return { d: Math.floor(totalCents/100), c: totalCents%100 };
+  }
+  function fmtMoney(d, c){
+    d = Math.max(0, Math.floor(d));
+    c = Math.max(0, Math.floor(c));
+    return `$${d}.${String(c).padStart(2,"0")}`;
+  }
+
+  function isValidCentAmount(c){
+    c = clampInt(c, 0, 95);
+    return (c % 5 === 0);
+  }
+
+  // ======= Visual token styles (simple + clear) =======
+  function tokenStyle(kind, v){
+    // produce a gradient-ish background without external assets
+    // different colors per denom for clarity
+    const key = `${kind}${v}`;
+    const palette = {
+      "$100": ["#c7f9cc","#57cc99"],
+      "$50" : ["#dbeafe","#60a5fa"],
+      "$10" : ["#fde68a","#f59e0b"],
+      "$5"  : ["#fecaca","#ef4444"],
+      "$2"  : ["#e9d5ff","#a78bfa"],
+      "$1"  : ["#cffafe","#22d3ee"],
+      "c50" : ["#dcfce7","#22c55e"],
+      "c20" : ["#ffedd5","#fb923c"],
+      "c10" : ["#e0f2fe","#38bdf8"],
+      "c5"  : ["#fae8ff","#d946ef"],
+    };
+    const [a,b] = palette[key] || ["#f1f5f9","#cbd5e1"];
+    return `linear-gradient(180deg, ${a} 0%, ${b} 100%)`;
+  }
+
+  function makeTokenEl(kind, v){
+    const el = document.createElement("div");
+    const isNote = (kind==="$" && v>=5); // simple convention
+    el.className = "token " + (isNote ? "note" : "coin");
+    el.style.background = tokenStyle(kind, v);
+
+    const t = document.createElement("div");
+    t.className = "txt";
+    if (kind==="$") t.textContent = `$${v}`;
+    else t.textContent = `${v}¢`;
+    el.appendChild(t);
+    return el;
+  }
+
+  // ======= Build mat columns =======
+  const zone = { dollars:{}, cents:{} };
+
+  function makeDenomCol(kind, v){
+    const col = document.createElement("div");
+    col.className = "denomCol";
+    col.dataset.kind = kind;
+    col.dataset.v = String(v);
+
+    const head = document.createElement("div");
+    head.className = "denomHead";
+    const lab = document.createElement("div");
+    lab.className = "label";
+    const chip = document.createElement("span");
+    chip.className = "mini";
+    chip.textContent = (kind==="$") ? `$${v}` : `${v}¢`;
+    lab.appendChild(chip);
+
+    const cnt = document.createElement("div");
+    cnt.className = "mini";
+    cnt.innerHTML = `count: <b id="cnt_${kind}${v}">0</b>`;
+
+    head.appendChild(lab);
+    head.appendChild(cnt);
+
+    const pw = document.createElement("div");
+    pw.className = "pileWrap";
+    const fit = document.createElement("div");
+    fit.className = "fitBox";
+    const pile = document.createElement("div");
+    pile.className = "pile";
+    pile.dataset.kind = kind;
+    pile.dataset.v = String(v);
+    fit.appendChild(pile);
+    pw.appendChild(fit);
+
+    col.appendChild(head);
+    col.appendChild(pw);
+
+    return { col, pile, fit };
+  }
+
+  function fitAll(){
+    const fits = document.querySelectorAll(".fitBox");
+    fits.forEach(f => {
+      f.style.transform = "scale(1)";
+      const p = f.parentElement;
+      if (!p) return;
+      const availW = p.clientWidth - 10;
+      const availH = p.clientHeight - 10;
+      const w = f.scrollWidth;
+      const h = f.scrollHeight;
+      if (w < 1 || h < 1) return;
+      const s = Math.min(1, availW / w, availH / h);
+      f.style.transform = `scale(${s})`;
+    });
+  }
+
+  // ======= Greedy decomposition (SGD denoms, cents multiple of 5) =======
+  function decompose(totalCents){
+    totalCents = Math.max(0, Math.floor(totalCents));
+    // dollars part and cents part separately
+    const {d, c} = centsToMoney(totalCents);
+
+    let dollars = d;
+    let cents = c;
+
+    // cents must be multiple of 5 (we enforce before calling)
+    const out = { "$": {}, c: {} };
+    DOLLAR_DENOMS.forEach(v => out["$"][v] = 0);
+    CENT_DENOMS.forEach(v => out.c[v] = 0);
+
+    // dollars: greedy with [100,50,10,5,2,1]
+    for (const v of DOLLAR_DENOMS){
+      const n = Math.floor(dollars / v);
+      out["$"][v] = n;
+      dollars -= n*v;
+    }
+
+    // cents: greedy with [50,20,10,5]
+    for (const v of CENT_DENOMS){
+      const n = Math.floor(cents / v);
+      out.c[v] = n;
+      cents -= n*v;
+    }
+
+    return out;
+  }
+
+  // ======= State =======
+  let order = "centsFirst"; // or dollarsFirst
+  let A = {d:12, c:35};
+  let B = {d:7,  c:80};
+
+  // pileCounts = counts for the "working" minuend A only (we animate subtraction on A piles)
+  let pileCounts = { "$": {}, c:{} };
+
+  let actions = [];
+  let actionIndex = 0;
+  let busy = false;
+
+  // ======= Rendering piles =======
+  function setCount(kind, v, n){
+    pileCounts[kind][v] = n;
+    const id = `cnt_${kind}${v}`;
+    const el = document.getElementById(id);
+    if (el) el.textContent = String(n);
+  }
+
+  function renderPile(kind, v){
+    const z = (kind==="$") ? zone.dollars[v] : zone.cents[v];
+    if (!z) return;
+    const pile = z.pile;
+    pile.innerHTML = "";
+    const n = pileCounts[kind][v] || 0;
+    for (let i=0;i<n;i++){
+      pile.appendChild(makeTokenEl(kind, v));
+    }
+  }
+
+  function renderAllPiles(){
+    for (const v of DOLLAR_DENOMS) renderPile("$", v);
+    for (const v of CENT_DENOMS) renderPile("c", v);
+    requestAnimationFrame(fitAll);
+  }
+
+  function setPillTexts(){
+    const aStr = fmtMoney(A.d, A.c);
+    const bStr = fmtMoney(B.d, B.c);
+    ui.pillA.textContent = aStr;
+    ui.pillB.textContent = bStr;
+    ui.eqA.textContent = aStr;
+    ui.eqB.textContent = bStr;
+    ui.prompt.textContent = `(a) Subtract ${bStr} from ${aStr}.`;
+    ui.pillOrder.textContent = (order==="centsFirst") ? "Cents → Dollars" : "Dollars → Cents";
+  }
+
+  // ======= Action builder (make-change then subtract) =======
+  function key(kind, v){ return (kind==="$") ? `$${v}` : `c${v}`; }
+
+  function addChangeAction(fromKind, fromV){
+    const k = key(fromKind, fromV);
+    const rule = CHANGE[k];
+    if (!rule) return null;
+    return { type:"change", fromKind, fromV, to: rule.map(x => ({kind:x.k, v:x.v, n:x.n})) };
+  }
+
+  function addSubtractAction(kind, v, n){
+    return { type:"subtract", kind, v, n };
+  }
+
+  function buildMoneyActions(){
+    // target subtraction: A - B (validate ensured A>=B)
+    const At = moneyToCents(A.d, A.c);
+    const Bt = moneyToCents(B.d, B.c);
+
+    // desired counts to subtract from A piles
+    const want = decompose(Bt); // how many tokens of each denom we must remove
+    // working copy of available counts in A piles
+    const work = JSON.parse(JSON.stringify(pileCounts));
+
+    const out = [];
+
+    const doSection = (section) => {
+      // section = "cents" or "dollars"
+      if (section === "cents"){
+        // process from small to big? subtraction uses available denoms; we will ensure enough in each denom by breaking bigger down to needed smaller.
+        // We'll subtract using the same denom breakdown of B (want).
+        // Ensure enough 5¢,10¢,20¢,50¢ counts, by breaking bigger when needed.
+        const den = [5,10,20,50]; // ensure small first
+        // helper to get count
+        const get = (v)=> work.c[v]||0;
+
+        // ensure needed for each denom v by changing larger coins down until sufficient
+        for (const v of den){
+          const need = want.c[v]||0;
+          while (get(v) < need){
+            // find a larger denom that can be changed down towards v
+            // prefer 10->5, 20->10, 50->10
+            let donor = null;
+            if (v===5){
+              if (get(10)>0) donor=10;
+              else if (get(20)>0) donor=20;  // will become 2×10 then maybe 10->5
+              else if (get(50)>0) donor=50;  // becomes 5×10 then maybe 10->5
+            } else if (v===10){
+              if (get(20)>0) donor=20;
+              else if (get(50)>0) donor=50;
+            } else if (v===20){
+              if (get(50)>0) donor=50; // becomes 5×10; cannot become 20 directly, but 10s cover 20 need by using 20? (we keep want as 20 coins)
+              // If B needs 20¢ but we only have 10¢, we can still subtract value, but you asked to keep display of coins/notes.
+              // To keep it strict, we will NOT substitute denoms; we will create 20¢ from 2×10¢? That's not a single 20¢ coin.
+              // So we keep B decomposition; if 20¢ needed and no 20¢ coins, we can change A's 20¢ from larger? doesn't exist. We'll handle by rebuilding B decomposition into available denoms already (it is).
+              // If A doesn't have 20¢ but B needs it, we can still subtract by breaking B's 20¢ into 2×10¢ (same value). We'll do that as a special "re-express" step.
+            } else if (v===50){
+              // can't make 50 from smaller; must borrow from dollars ($1 -> 10×10¢ then make 50? still not 50 coin).
+              donor = null;
+            }
+
+            if (donor === null){
+              // try cross-borrow from dollars: $1 -> 10×10¢ (helps for 10/5, and can be regrouped)
+              if (work["$"][1] > 0){
+                out.push(addChangeAction("$",1));
+                // apply
+                work["$"][1] -= 1;
+                // add 10×10¢
+                work.c[10] = (work.c[10]||0) + 10;
+                continue;
+              }
+              // otherwise break $2/$5/$10 to get $1 then cross-borrow
+              const dollarDonor = [2,5,10,50,100].find(dv => (work["$"][dv]||0) > 0);
+              if (dollarDonor){
+                // break down until we get $1 available; chain via $10->$1, $5->$1, $2->$1, $50->$10, $100->$10
+                out.push(addChangeAction("$", dollarDonor));
+                // apply rule
+                work["$"][dollarDonor] -= 1;
+                for (const r of CHANGE[`$${dollarDonor}`]){
+                  work[r.k][r.v] = (work[r.k][r.v]||0) + r.n;
+                }
+                continue;
+              }
+              // no way
+              break;
+            } else {
+              out.push(addChangeAction("c", donor));
+              work.c[donor] -= 1;
+              for (const r of CHANGE[`c${donor}`]){
+                work[r.k][r.v] = (work[r.k][r.v]||0) + r.n;
+              }
+            }
+          }
+
+          // Special: if v===20 and still insufficient but we have 10s, re-express B's 20¢ into 2×10¢ (SGD value-safe)
+          if (v===20){
+            const need20 = want.c[20]||0;
+            const have20 = get(20);
+            if (have20 < need20){
+              const short = need20 - have20;
+              // convert SHORT number of "20¢ to subtract" into 2×10¢ each
+              want.c[20] -= short;
+              want.c[10] = (want.c[10]||0) + (short*2);
+              // add a teaching note as a step (no pile change yet)
+              out.push({
+                type:"note",
+                text:`Re-express ${short}×20¢ as ${short*2}×10¢ (same value) because 20¢ coins are not available in the minuend after making change.`
+              });
+              // now loop back to ensure 10¢ (and 5¢) needs are met
+            }
+          }
+
+          // After ensuring, subtract needed v
+          const needNow = want.c[v]||0;
+          if (needNow > 0){
+            out.push(addSubtractAction("c", v, needNow));
+            work.c[v] -= needNow;
+          }
+        }
+
+        // handle remaining 50¢ need (if any): if not enough 50¢, re-express 50¢ to 5×10¢
+        const need50 = want.c[50]||0;
+        const have50 = work.c[50]||0;
+        if (need50 > have50){
+          const short = need50 - have50;
+          // convert B-side 50¢ into 5×10¢
+          want.c[50] -= short;
+          want.c[10] = (want.c[10]||0) + (short*5);
+          out.push({
+            type:"note",
+            text:`Re-express ${short}×50¢ as ${short*5}×10¢ (same value) to match available coins.`
+          });
+          // ensure 10¢ again
+          const need10 = want.c[10]||0;
+          while ((work.c[10]||0) < need10){
+            // borrow $1 -> 10×10¢ if possible
+            if ((work["$"][1]||0) > 0){
+              out.push(addChangeAction("$",1));
+              work["$"][1] -= 1;
+              work.c[10] = (work.c[10]||0) + 10;
+            } else {
+              break;
+            }
+          }
+          // subtract updated wants
+          if ((want.c[10]||0) > 0){
+            out.push(addSubtractAction("c",10, want.c[10]));
+            work.c[10] -= want.c[10];
+            want.c[10] = 0;
+          }
+        } else if (need50 > 0){
+          out.push(addSubtractAction("c",50, need50));
+          work.c[50] -= need50;
+        }
+
+      } else {
+        // dollars section
+        // We want to subtract want["$"][denom] tokens from A. Ensure enough small dollars by breaking larger notes.
+        const den = [1,2,5,10,50,100]; // small to big for ensuring, but subtract by B's decomposition which uses big first; we will ensure then subtract by each denom big->small for clarity.
+        const get = (v)=> work["$"][v]||0;
+
+        // If B needs $2 but we only have $1, re-express $2 as 2×$1 (value-safe)
+        // Similarly $5 as 5×$1, $10 as 10×$1, $50 as 5×$10, $100 as 10×$10.
+        const reExpressIfNeeded = (v) => {
+          const need = want["$"][v]||0;
+          const have = get(v);
+          if (need > have){
+            const short = need - have;
+            if (v===2){
+              want["$"][2] -= short;
+              want["$"][1] = (want["$"][1]||0) + short*2;
+              out.push({ type:"note", text:`Re-express ${short}×$2 as ${short*2}×$1 (same value).` });
+            } else if (v===5){
+              want["$"][5] -= short;
+              want["$"][1] = (want["$"][1]||0) + short*5;
+              out.push({ type:"note", text:`Re-express ${short}×$5 as ${short*5}×$1 (same value).` });
+            } else if (v===10){
+              want["$"][10] -= short;
+              want["$"][1] = (want["$"][1]||0) + short*10;
+              out.push({ type:"note", text:`Re-express ${short}×$10 as ${short*10}×$1 (same value).` });
+            } else if (v===50){
+              want["$"][50] -= short;
+              want["$"][10] = (want["$"][10]||0) + short*5;
+              out.push({ type:"note", text:`Re-express ${short}×$50 as ${short*5}×$10 (same value).` });
+            } else if (v===100){
+              want["$"][100] -= short;
+              want["$"][10] = (want["$"][10]||0) + short*10;
+              out.push({ type:"note", text:`Re-express ${short}×$100 as ${short*10}×$10 (same value).` });
+            }
+          }
+        };
+
+        // First, try re-express (B-side) if A doesn't naturally have those notes/coins after change
+        [100,50,10,5,2].forEach(reExpressIfNeeded);
+
+        // Ensure enough $1 by breaking larger if needed (since many re-expressions go to $1)
+        const need1 = want["$"][1]||0;
+        while (get(1) < need1){
+          // find donor: 2/5/10/50/100
+          const donor = [2,5,10,50,100].find(dv => get(dv) > 0);
+          if (!donor) break;
+          out.push(addChangeAction("$", donor));
+          work["$"][donor] -= 1;
+          for (const r of CHANGE[`$${donor}`]){
+            work[r.k][r.v] = (work[r.k][r.v]||0) + r.n;
+          }
+        }
+
+        // Ensure enough $10 if B got re-expressed into $10 (from $50/$100)
+        const need10 = want["$"][10]||0;
+        while (get(10) < need10){
+          const donor = [50,100].find(dv => get(dv) > 0);
+          if (!donor) break;
+          out.push(addChangeAction("$", donor));
+          work["$"][donor] -= 1;
+          for (const r of CHANGE[`$${donor}`]){
+            work[r.k][r.v] = (work[r.k][r.v]||0) + r.n;
+          }
+        }
+
+        // Finally subtract (big to small looks nicer)
+        const orderSub = [100,50,10,5,2,1];
+        for (const v of orderSub){
+          const n = want["$"][v]||0;
+          if (n>0){
+            out.push(addSubtractAction("$", v, n));
+            work["$"][v] -= n;
+          }
+        }
+      }
+    };
+
+    if (order === "centsFirst"){
+      doSection("cents");
+      doSection("dollars");
+    } else {
+      doSection("dollars");
+      doSection("cents");
+    }
+
+    // end action
+    out.push({ type:"finish" });
+    return out;
+  }
+
+  // ======= Apply actions (with simple animation) =======
+  function setStepCard(text, eqL, ansText, mystery){
+    ui.stepText.textContent = text;
+    ui.stepL.textContent = eqL || "";
+    ui.stepAns.textContent = ansText || "?";
+    ui.stepAns.classList.toggle("mystery", !!mystery);
+  }
+
+  function countTotalCentsFromPiles(){
+    let total = 0;
+    for (const v of DOLLAR_DENOMS) total += (pileCounts["$"][v]||0) * v * 100;
+    for (const v of CENT_DENOMS) total += (pileCounts.c[v]||0) * v;
+    return total;
+  }
+
+  async function animateRemove(kind, v, n){
+    n = Math.max(0, Math.floor(n));
+    if (n<=0) return;
+
+    const z = (kind==="$") ? zone.dollars[v] : zone.cents[v];
+    if (!z) return;
+
+    const pile = z.pile;
+    const tokens = Array.from(pile.children).slice(-n);
+    tokens.forEach(t => t.classList.add("movingHidden"));
+    playSwoosh();
+
+    await new Promise(r => setTimeout(r, 420));
+
+    tokens.forEach(t => t.remove());
+    setCount(kind, v, (pileCounts[kind][v]||0) - n);
+    renderPile(kind, v);
+  }
+
+  async function animateChange(fromKind, fromV, toList){
+    // remove 1 donor token, add several child tokens
+    const fromZ = (fromKind==="$") ? zone.dollars[fromV] : zone.cents[fromV];
+    if (!fromZ) return;
+
+    const pile = fromZ.pile;
+    const donor = Array.from(pile.children).slice(-1)[0];
+    if (!donor) return;
+
+    donor.classList.add("movingHidden");
+    playSwoosh();
+    await new Promise(r => setTimeout(r, 320));
+    donor.remove();
+
+    setCount(fromKind, fromV, (pileCounts[fromKind][fromV]||0) - 1);
+    renderPile(fromKind, fromV);
+
+    // add tokens
+    for (const t of toList){
+      const kind = t.kind;
+      const v = t.v;
+      const n = t.n;
+      setCount(kind, v, (pileCounts[kind][v]||0) + n);
+      renderPile(kind, v);
+    }
+
+    playClick();
+    requestAnimationFrame(fitAll);
+  }
+
+  async function doNext(){
+    if (busy) return;
+    const a = actions[actionIndex];
+    if (!a) return;
+    busy = true;
+
+    ui.btnNext.disabled = true;
+
+    ui.stepTitle.textContent = `STEP ${actionIndex + 1}`;
+
+    if (a.type === "note"){
+      setStepCard(a.text, "Teacher note", "✓", false);
+      playClick();
+      actionIndex++;
+      ui.btnNext.disabled = false;
+      busy = false;
+      return;
+    }
+
+    if (a.type === "change"){
+      const fromLabel = (a.fromKind==="$") ? `$${a.fromV}` : `${a.fromV}¢`;
+      const toLabel = a.to.map(x => `${x.n}×${x.k==="$" ? "$"+x.v : x.v+"¢"}`).join(" + ");
+      setStepCard(
+        `Make change: change 1×${fromLabel} into ${toLabel}.`,
+        `1×${fromLabel} = ${toLabel}`,
+        "✓",
+        false
+      );
+      document.body.classList.add("animating");
+      await animateChange(a.fromKind, a.fromV, a.to);
+      document.body.classList.remove("animating");
+
+      actionIndex++;
+      ui.btnNext.disabled = false;
+      busy = false;
+      updateEq();
+      return;
+    }
+
+    if (a.type === "subtract"){
+      const lab = (a.kind==="$") ? `$${a.v}` : `${a.v}¢`;
+      setStepCard(
+        `Subtract: remove ${a.n} of ${lab}.`,
+        `${a.n}×${lab}`,
+        "?",
+        true
+      );
+
+      document.body.classList.add("animating");
+      await animateRemove(a.kind, a.v, a.n);
+      document.body.classList.remove("animating");
+
+      // show the mini answer as remaining count in that denom (nice quick feedback)
+      const remaining = pileCounts[a.kind][a.v] || 0;
+      ui.stepAns.textContent = `left: ${remaining}`;
+      ui.stepAns.classList.remove("mystery");
+
+      actionIndex++;
+      ui.btnNext.disabled = false;
+      busy = false;
+      updateEq();
+      return;
+    }
+
+    if (a.type === "finish"){
+      const At = moneyToCents(A.d, A.c);
+      const Bt = moneyToCents(B.d, B.c);
+      const diff = At - Bt;
+      const m = centsToMoney(diff);
+
+      setStepCard("All steps completed.", "Done", "✓", false);
+      ui.eqAns.textContent = fmtMoney(m.d, m.c);
+      ui.eqHint.textContent = "Done!";
+      ui.btnDone.disabled = false;
+      ui.btnNext.disabled = true;
+      playClick();
+      actionIndex++;
+      busy = false;
+      return;
+    }
+
+    // fallback
+    actionIndex++;
+    ui.btnNext.disabled = false;
+    busy = false;
+  }
+
+  function updateEq(){
+    const At = moneyToCents(A.d, A.c);
+    const Bt = moneyToCents(B.d, B.c);
+    const correct = At - Bt;
+
+;
+    const remain = countTotalCentsFromPiles();
+    // During steps, remain represents current value of working piles (starts at A, ends at A-B)
+    const m = centsToMoney(remain);
+    ui.eqAns.textContent = (actionIndex >= actions.length-1) ? fmtMoney(centsToMoney(correct).d, centsToMoney(correct).c) : "?";
+    ui.eqHint.textContent = `Working value (minuend after changes/subtractions): ${fmtMoney(m.d, m.c)}. Click Next Step.`;
+  }
+
+  // ======= Init / rebuild =======
+  function rebuildZones(){
+    ui.dollarCols.innerHTML = "";
+    ui.centCols.innerHTML = "";
+
+    // grid columns counts (responsive):
+    // dollars 6 cols, cents 4 cols on wide; stack on smaller by CSS auto-fit:
+    ui.dollarCols.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
+    ui.centCols.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+
+    // dollars
+    zone.dollars = {};
+    for (const v of DOLLAR_DENOMS){
+      const obj = makeDenomCol("$", v);
+      ui.dollarCols.appendChild(obj.col);
+      zone.dollars[v] = obj;
+    }
+    // cents
+    zone.cents = {};
+    for (const v of CENT_DENOMS){
+      const obj = makeDenomCol("c", v);
+      ui.centCols.appendChild(obj.col);
+      zone.cents[v] = obj;
+    }
+  }
+
+  function resetProcess(){
+    actionIndex = 0;
+    actions = buildMoneyActions();
+
+    ui.eqAns.textContent = "?";
+    ui.eqHint.textContent = "Click Next Step";
+    ui.btnDone.disabled = true;
+    ui.btnNext.disabled = false;
+
+    ui.stepTitle.textContent = "STEP 1";
+    setStepCard("Make change if needed.", "Start", "?", true);
+
+    updateEq();
+  }
+
+  function loadFromInputs(){
+    const Ad = clampInt(ui.inAd.value, 0, 9999);
+    const Ac = clampInt(ui.inAc.value, 0, 95);
+    const Bd = clampInt(ui.inBd.value, 0, 9999);
+    const Bc = clampInt(ui.inBc.value, 0, 95);
+
+    // strict SGD cents
+    if (!isValidCentAmount(Ac) || !isValidCentAmount(Bc)){
+      showErr("SGD cents must be multiples of 5¢ (e.g., 0, 5, 10, …, 95). There is no 1¢ denomination.");
+      return null;
+    }
+
+    const At = moneyToCents(Ad, Ac);
+    const Bt = moneyToCents(Bd, Bc);
+
+    if (Bt > At){
+      showErr("For subtraction, Amount A must be ≥ Amount B. (Tip: use Swap A/B).");
+      return null;
+    }
+
+    showErr("");
+    A = { d: Ad, c: Ac };
+    B = { d: Bd, c: Bc };
+
+    return {At, Bt};
+  }
+
+  function applyAll(){
+    const ok = loadFromInputs();
+    if (!ok) return;
+
+    setPillTexts();
+
+    // build initial piles from A only
+    const ATotal = moneyToCents(A.d, A.c);
+    const decA = decompose(ATotal);
+
+    pileCounts = { "$": {}, c:{} };
+    for (const v of DOLLAR_DENOMS) pileCounts["$"][v] = decA["$"][v] || 0;
+    for (const v of CENT_DENOMS) pileCounts.c[v] = decA.c[v] || 0;
+
+    // render
+    for (const v of DOLLAR_DENOMS) setCount("$", v, pileCounts["$"][v]);
+    for (const v of CENT_DENOMS) setCount("c", v, pileCounts.c[v]);
+
+    renderAllPiles();
+    resetProcess();
+  }
+
+  // ======= Order UI =======
+  function applyOrderUI(){
+    ui.btnCentsFirst.classList.toggle("active", order==="centsFirst");
+    ui.btnDollarsFirst.classList.toggle("active", order==="dollarsFirst");
+    ui.pillOrder.textContent = (order==="centsFirst") ? "Cents → Dollars" : "Dollars → Cents";
+  }
+
+  // ======= Events =======
+  ui.btnApply.addEventListener("click", () => applyAll());
+
+  ui.btnSwap.addEventListener("click", () => {
+    // swap inputs first
+    const Ad = ui.inAd.value, Ac = ui.inAc.value;
+    ui.inAd.value = ui.inBd.value; ui.inAc.value = ui.inBc.value;
+    ui.inBd.value = Ad;           ui.inBc.value = Ac;
+    applyAll();
+  });
+
+  ui.btnCentsFirst.addEventListener("click", () => {
+    order = "centsFirst";
+    applyOrderUI();
+    applyAll();
+  });
+
+  ui.btnDollarsFirst.addEventListener("click", () => {
+    order = "dollarsFirst";
+    applyOrderUI();
+    applyAll();
+  });
+
+  ui.btnReset.addEventListener("click", () => applyAll());
+  ui.btnNext.addEventListener("click", () => doNext());
+
+  window.addEventListener("resize", () => requestAnimationFrame(fitAll));
+
+  // ======= Init =======
+  rebuildZones();
+  applyOrderUI();
+  setPillTexts();
+  applyAll();
+})();
+</script>
+
+</body>
+</html>
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -2409,3 +3914,4 @@
 
 </body>
 </html>
+
